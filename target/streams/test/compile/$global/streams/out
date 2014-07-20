@@ -1,0 +1,36 @@
+[0m[[0mdebug[0m] [0m[0m
+[0m[[0mdebug[0m] [0mInitial source changes: [0m
+[0m[[0mdebug[0m] [0m	removed:Set()[0m
+[0m[[0mdebug[0m] [0m	added: Set(/Users/sameerambegaonkar/scalatutorial/chatterbox/src/test/scala/com/chatterbox/IntegrationTests.scala)[0m
+[0m[[0mdebug[0m] [0m	modified: Set()[0m
+[0m[[0mdebug[0m] [0mRemoved products: Set()[0m
+[0m[[0mdebug[0m] [0mExternal API changes: API Changes: Set()[0m
+[0m[[0mdebug[0m] [0mModified binary dependencies: Set()[0m
+[0m[[0mdebug[0m] [0mInitial directly invalidated sources: Set(/Users/sameerambegaonkar/scalatutorial/chatterbox/src/test/scala/com/chatterbox/IntegrationTests.scala)[0m
+[0m[[0mdebug[0m] [0m[0m
+[0m[[0mdebug[0m] [0mSources indirectly invalidated by:[0m
+[0m[[0mdebug[0m] [0m	product: Set()[0m
+[0m[[0mdebug[0m] [0m	binary dep: Set()[0m
+[0m[[0mdebug[0m] [0m	external source: Set()[0m
+[0m[[0mdebug[0m] [0mAll initially invalidated sources: Set(/Users/sameerambegaonkar/scalatutorial/chatterbox/src/test/scala/com/chatterbox/IntegrationTests.scala)[0m
+[0m[[0mdebug[0m] [0mRecompiling all 1 sources: invalidated sources (1) exceeded 50.0% of all sources[0m
+[0m[[0minfo[0m] [0mCompiling 1 Scala source to /Users/sameerambegaonkar/scalatutorial/chatterbox/target/scala-2.10/test-classes...[0m
+[0m[[0mdebug[0m] [0mGetting compiler-interface from component compiler for Scala 2.10.4[0m
+[0m[[0mdebug[0m] [0mGetting compiler-interface from component compiler for Scala 2.10.4[0m
+[0m[[0mdebug[0m] [0mRunning cached compiler 647af9aa, interfacing (CompilerInterface) with Scala compiler version 2.10.4[0m
+[0m[[0mdebug[0m] [0mCalling Scala compiler with arguments  (CompilerInterface):[0m
+[0m[[0mdebug[0m] [0m	-bootclasspath[0m
+[0m[[0mdebug[0m] [0m	/Library/Java/JavaVirtualMachines/jdk1.7.0_12.jdk/Contents/Home/jre/lib/resources.jar:/Library/Java/JavaVirtualMachines/jdk1.7.0_12.jdk/Contents/Home/jre/lib/rt.jar:/Library/Java/JavaVirtualMachines/jdk1.7.0_12.jdk/Contents/Home/jre/lib/sunrsasign.jar:/Library/Java/JavaVirtualMachines/jdk1.7.0_12.jdk/Contents/Home/jre/lib/jsse.jar:/Library/Java/JavaVirtualMachines/jdk1.7.0_12.jdk/Contents/Home/jre/lib/jce.jar:/Library/Java/JavaVirtualMachines/jdk1.7.0_12.jdk/Contents/Home/jre/lib/charsets.jar:/Library/Java/JavaVirtualMachines/jdk1.7.0_12.jdk/Contents/Home/jre/lib/jfr.jar:/Library/Java/JavaVirtualMachines/jdk1.7.0_12.jdk/Contents/Home/jre/lib/JObjC.jar:/Library/Java/JavaVirtualMachines/jdk1.7.0_12.jdk/Contents/Home/jre/classes:/Users/sameerambegaonkar/.ivy2/cache/org.scala-lang/scala-library/jars/scala-library-2.10.4.jar[0m
+[0m[[0mdebug[0m] [0m	-classpath[0m
+[0m[[0mdebug[0m] [0m	/Users/sameerambegaonkar/scalatutorial/chatterbox/target/scala-2.10/test-classes:/Users/sameerambegaonkar/scalatutorial/chatterbox/target/scala-2.10/classes:/Users/sameerambegaonkar/.ivy2/cache/com.typesafe.akka/akka-actor_2.10/jars/akka-actor_2.10-2.3.1.jar:/Users/sameerambegaonkar/.ivy2/cache/com.typesafe/config/bundles/config-1.2.0.jar:/Users/sameerambegaonkar/.ivy2/cache/org.scalatest/scalatest_2.11/jars/scalatest_2.11-2.1.7.jar:/Users/sameerambegaonkar/.ivy2/cache/org.scala-lang/scala-reflect/jars/scala-reflect-2.11.0.jar:/Users/sameerambegaonkar/.ivy2/cache/org.scala-lang.modules/scala-parser-combinators_2.11/bundles/scala-parser-combinators_2.11-1.0.1.jar:/Users/sameerambegaonkar/.ivy2/cache/org.scala-lang.modules/scala-xml_2.11/bundles/scala-xml_2.11-1.0.1.jar[0m
+[0m[[31merror[0m] [0mbad symbolic reference. A signature in package.class refers to type compileTimeOnly[0m
+[0m[[31merror[0m] [0min package scala.annotation which is not available.[0m
+[0m[[31merror[0m] [0mIt may be completely missing from the current classpath, or the version on[0m
+[0m[[31merror[0m] [0mthe classpath might be incompatible with the version used when compiling package.class.[0m
+[0m[[31merror[0m] [0m/Users/sameerambegaonkar/scalatutorial/chatterbox/src/test/scala/com/chatterbox/IntegrationTests.scala:8: Reference to class FeatureSpec in package scalatest should not have survived past type checking,[0m
+[0m[[31merror[0m] [0mit should have been processed and eliminated during expansion of an enclosing macro.[0m
+[0m[[31merror[0m] [0mclass IntegrationTests extends FeatureSpec with GivenWhenThen{[0m
+[0m[[31merror[0m] [0m                               ^[0m
+[0m[[31merror[0m] [0mtwo errors found[0m
+[0m[[0mdebug[0m] [0mCompilation failed (CompilerInterface)[0m
+[0m[[31merror[0m] [0m(test:[31mcompile[0m) Compilation failed[0m

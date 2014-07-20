@@ -1,0 +1,8 @@
+test:compile
+quit
+exit
+test:compile
+clean
+build
+test:compile
+exit
