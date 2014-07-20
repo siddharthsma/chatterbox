@@ -7,18 +7,44 @@ import akka.actor.{ActorRef, Actor, ActorLogging}
  */
 case class Message(message: String)
 case class ChannelGreeting(message: String, channelNameAndRef: (String, ActorRef) )
+case class ChannelSubscriptionResponse(channelName: String, channelRef: ActorRef)
+case class ChannelUnSubscriptionResponse(channelName: String, channelRef: ActorRef)
 
-class Channel(name: String, subscribersMap: Map[String, ActorRef]) extends Actor with ActorLogging{
+class Channel(name: String) extends Actor with ActorLogging{
+  var subscribersMap = Map[String, ActorRef]()
+
   def receive = {
-    case ChannelSubscriptionMessageToAll => channelMessage(s"Joined Channel $name", subscribersMap.keySet)
+    case ChannelSubscriptionMessage(userAndRef) =>
+      addToSubscribersMap(userAndRef)
+      sendSubscriptionConfirmation(userAndRef)
+      val user = userAndRef._1
+      sendMessage(s"$name: $user joined channel")
+    case ChannelUnSubscriptionMessage(userAndRef) =>
+      removeFromSubscribersMap(userAndRef)
+      sendUnSubscriptionConfirmation(userAndRef)
+      val user = userAndRef._1
+      sendMessage(s"$name: $user left channel ")
+    case ChannelMessage(message, from) => sendMessage(s"$name:$from: $message")
   }
 
-  def channelMessage(message: String, subscriberNames: Set[String]) = {
-    val subscriberNamesAndRefs = getParticularSubscribersMap(subscriberNames)
-    subscriberNamesAndRefs.foreach((e: (String, ActorRef)) => e._2 ! ChannelGreeting(s"$name : Joined channel $name", (name, context.self)))
+  def addToSubscribersMap(userAndRef: (String, ActorRef)) = {
+    subscribersMap = subscribersMap ++ Map(userAndRef._1 -> userAndRef._2)
   }
 
-  def getParticularSubscribersMap(subscriberNames: Set[String]) = {
-    subscribersMap.filterKeys(subscriberNames.contains)
+  def removeFromSubscribersMap(userAndRef: (String, ActorRef)) = {
+    subscribersMap = subscribersMap - userAndRef._1
   }
+
+  def sendSubscriptionConfirmation(userAndRef: (String, ActorRef)) = {
+    userAndRef._2 ! ChannelSubscriptionResponse(name, context.self)
+  }
+
+  def sendUnSubscriptionConfirmation(userAndRef: (String, ActorRef)) = {
+    userAndRef._2 ! ChannelUnSubscriptionResponse(name, context.self)
+  }
+
+  def sendMessage(message: String) = {
+    subscribersMap.values.foreach(ref => ref ! Message(message))
+  }
+
 }

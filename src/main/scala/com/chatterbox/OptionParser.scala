@@ -8,10 +8,13 @@ case object ListUsers extends Command
 case object ListChannels extends Command
 case object ViewOptions extends Command
 case object ListSubscribedChannels extends Command
-case class CreateChannel(roomName: String, users: Array[String]) extends Command
-case class JoinChannel(roomName: String) extends Command
+case class CreateChannel(channelName: String) extends Command
+case class JoinChannel(channelName: String) extends Command
+case class LeaveChannel(channelName: String) extends Command
+case class SendMessage(channelName: String, message: String) extends Command
 case object LogOutAndCloseConnection extends Command
 case object UnknownCommand extends Command
+case object DoNothing extends Command
 
 class OptionParser(val command: String) {
   def parse: Command = {
@@ -22,9 +25,12 @@ class OptionParser(val command: String) {
         case "listchannels" => ListChannels
         case "mychannels" => ListSubscribedChannels
         case "options" => ViewOptions
-        case "createchannel" => createChannelCase(command)
-        case "joinchannel" => createJoinChannelCase(command)
+        case "createchannel" => createCreateChannelCase(command)
+        case "joinchannel" => joinChannelCase(command)
+        case "leavechannel" => leaveChannelCase(command)
+        case "send" => sendMessageCase(command)
         case "quit" => LogOutAndCloseConnection
+        case "" => DoNothing
         case _ => UnknownCommand
       }
     } catch {
@@ -32,22 +38,54 @@ class OptionParser(val command: String) {
     }
   }
 
-  def createChannelCase(command: String) = {
+  def createCreateChannelCase(command: String) = {
     val splitCommand = command.split(" ")
-    val roomName = splitCommand(1)
-    val users = splitCommand.drop(2)
 
-    if(roomName.toString != "" && !users.isEmpty) {
-      CreateChannel(roomName, users)
+    if(splitCommand.length > 1) {
+      val channelName = splitCommand(1)
+      CreateChannel(channelName)
     }
     else {
       UnknownCommand
     }
   }
 
-  def createJoinChannelCase(command: String) = {
-    /** for now just return UnknownCommand */
-    UnknownCommand
+  def joinChannelCase(command: String) = {
+    val splitCommand = command.split(" ")
+
+    if(splitCommand.length > 1) {
+      val channelName = splitCommand(1)
+      JoinChannel(channelName)
+    }
+    else {
+      UnknownCommand
+    }
   }
 
+  def leaveChannelCase(command: String) = {
+    val splitCommand = command.split(" ")
+
+    if(splitCommand.length > 1) {
+      val channelName = splitCommand(1)
+      LeaveChannel(channelName)
+    }
+    else {
+      UnknownCommand
+    }
+  }
+
+  def sendMessageCase(command: String) = {
+    val splitCommand = command.split(" ", 3)
+
+    if(splitCommand.length == 3) {
+      val channelName = splitCommand(1)
+      val message = splitCommand(2)
+      SendMessage(channelName, message)
+    }
+    else {
+      UnknownCommand
+    }
+
+
+  }
 }

@@ -10,7 +10,9 @@ case class StartHandlingClient(userName: String)
 case class ListenForConnections(serverSocket: ServerSocket)
 case class UserListResponse(users: Set[String])
 case class ChannelListResponse(channels: Set[String])
-case object ChannelSubscriptionMessageToAll
+case class ChannelSubscriptionMessage(userAndRef: (String, ActorRef))
+case class ChannelUnSubscriptionMessage(userAndRef: (String, ActorRef))
+case class ChannelDoesNotExist(channelName: String)
 
 class RootHandler extends Actor with ActorLogging {
   var usersMap = Map[String, ActorRef]()
@@ -27,9 +29,13 @@ class RootHandler extends Actor with ActorLogging {
       sendListOfUsers
     case ChannelListRequest =>
       sendListOfChannels
-    case ChannelCreationRequest(roomName, users) =>
-      val channelUsersMap = actorRefsOfUsers(users)
-      createChannel(roomName, channelUsersMap)
+    case ChannelCreationRequest(channelName, user) =>
+      createChannel(channelName)
+      joinChannel(channelName, userAndRef(user))
+    case ChannelSubscriptionRequest(channelName, user) =>
+      if (channelExists(channelName)) joinChannel(channelName, userAndRef(user)) else sendChannelDoesNotExist(channelName, user)
+    case ChannelUnSubscriptionRequest(channelName, user) =>
+      if (channelExists(channelName)) leaveChannel(channelName, userAndRef(user)) else sendChannelDoesNotExist(channelName, user)
   }
 
   def launchListener(serverSocket: ServerSocket) = {
@@ -58,13 +64,30 @@ class RootHandler extends Actor with ActorLogging {
     sender ! ChannelListResponse(channelList)
   }
 
-  def actorRefsOfUsers(users: Array[String]) = {
-    usersMap.filterKeys(users.contains)
+  def sendChannelDoesNotExist(channelName: String, user: String) = {
+    usersMap(user) ! ChannelDoesNotExist(channelName)
   }
 
-  def createChannel(name: String, subscribersMap: Map[String, ActorRef]) = {
-    val channel = context.actorOf(Props(new Channel(name, subscribersMap)), name)
-    channel ! ChannelSubscriptionMessageToAll
+  def userAndRef(user: String) = {
+    (user, usersMap(user))
+  }
+
+  def createChannel(name: String) = {
+    val channel = context.actorOf(Props(new Channel(name)), name)
     channelsMap = channelsMap ++ Map(name -> channel)
+  }
+
+  def joinChannel(name: String, userAndRef: (String, ActorRef)) = {
+    val channel = channelsMap(name)
+    channel ! ChannelSubscriptionMessage(userAndRef)
+  }
+
+  def leaveChannel(name: String, userAndRef: (String, ActorRef)) = {
+    val channel = channelsMap(name)
+    channel ! ChannelUnSubscriptionMessage(userAndRef)
+  }
+
+  def channelExists(channelName: String): Boolean = {
+    channelsMap.keySet.contains(channelName)
   }
 }

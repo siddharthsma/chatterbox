@@ -9,7 +9,10 @@ import akka.actor.{Props, ActorLogging, Actor}
 case object UserListRequest
 case object ChannelListRequest
 case object SubscribedChannelsListRequest
-case class ChannelCreationRequest(name: String, users: Array[String])
+case class ChannelCreationRequest(name: String, user: String)
+case class ChannelSubscriptionRequest(name: String, user: String)
+case class ChannelUnSubscriptionRequest(name: String, user: String)
+case class DeliverMessage(channelName: String, message: String, from: String)
 case object ListenForOptions
 
 class AuthenticatedClient(val inputStream: BufferedReader, val outputStream: PrintStream, val userName: String) extends Actor with ActorLogging {
@@ -21,12 +24,15 @@ class AuthenticatedClient(val inputStream: BufferedReader, val outputStream: Pri
     case ListUsers => requestUserList
     case ListSubscribedChannels => requestSubscribedChannelsList
     case ListChannels => requestChannelsList
-    case CreateChannel(roomName, users) => requestChannelCreation(roomName, users)
+    case CreateChannel(channelName) => requestChannelCreation(channelName)
+    case JoinChannel(channelName) => requestChannelSubscription(channelName)
+    case LeaveChannel(channelName) => requestChannelUnSubscription(channelName)
     case ViewOptions => presentOptions
     case UnknownCommand => badCommand
     case UserListResponse(users) => printList("USERS:",users)
     case ChannelListResponse(channels) => printList("ALL CHANNELS:", channels)
     case SubscribedChannelsListResponse(channels) => printList("MY CHANNELS:", channels)
+    case SendMessage(channelName, message) => sendMessage(channelName, message)
     case Message(message) => printMessage(message)
   }
 
@@ -37,13 +43,15 @@ class AuthenticatedClient(val inputStream: BufferedReader, val outputStream: Pri
   }
 
   def presentOptions = {
-    outputStream.println("Options")
+    outputStream.println("OPTIONS")
     outputStream.println("")
     outputStream.println("List Users:         listusers")
     outputStream.println("List Channels:      listchannels")
     outputStream.println("List My Channels:   mychannels")
-    outputStream.println("Create Channel:     createchannel [ Channel] [ user1 user2 ... ]")
+    outputStream.println("Create Channel:     createchannel [ Channel]")
     outputStream.println("Join Channel:       joinchannel [ Channel ]")
+    outputStream.println("Leave Channel:      leavechannel [ Channel ]")
+    outputStream.println("Send Message:       send [ Channel ] [ Message ]")
     outputStream.println("View Options:       options")
   }
 
@@ -55,12 +63,24 @@ class AuthenticatedClient(val inputStream: BufferedReader, val outputStream: Pri
     context.actorSelection("akka://chatServerSystem/user/ChatServer/rootHandler") ! UserListRequest
   }
 
-  def requestChannelCreation(roomName: String, users: Array[String]) = {
-    context.actorSelection("akka://chatServerSystem/user/ChatServer/rootHandler") ! ChannelCreationRequest(roomName, userName +: users )
+  def requestChannelCreation(channelName: String) = {
+    context.actorSelection("akka://chatServerSystem/user/ChatServer/rootHandler") ! ChannelCreationRequest(channelName, userName )
+  }
+
+  def requestChannelSubscription(channelName: String) = {
+    context.actorSelection("akka://chatServerSystem/user/ChatServer/rootHandler") ! ChannelSubscriptionRequest(channelName, userName)
+  }
+
+  def requestChannelUnSubscription(channelName: String) = {
+    context.actorSelection("akka://chatServerSystem/user/ChatServer/rootHandler") ! ChannelUnSubscriptionRequest(channelName, userName)
   }
 
   def requestChannelsList = {
     context.actorSelection("akka://chatServerSystem/user/ChatServer/rootHandler") ! ChannelListRequest
+  }
+
+  def sendMessage(channelName: String, message: String) = {
+    context.parent ! DeliverMessage(channelName, message, userName)
   }
 
   def requestSubscribedChannelsList = {

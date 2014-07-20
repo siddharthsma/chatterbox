@@ -9,6 +9,7 @@ import java.io.{InputStreamReader, PrintStream, BufferedReader}
  */
 case object WelcomeAndWaitForOptions
 case class SubscribedChannelsListResponse(myChannels: Set[String])
+case class ChannelMessage(message: String, from: String)
 
 class AuthenticatedClientHandler(val socket: Socket) extends Actor with ActorLogging {
   var myChannelsMap = Map[String, ActorRef]()
@@ -18,10 +19,16 @@ class AuthenticatedClientHandler(val socket: Socket) extends Actor with ActorLog
       val (inputStream, outputStream) = setupClientStreams(socket)
       val client = createClientActor(inputStream, outputStream, userName)
       client ! WelcomeAndWaitForOptions
-    case ChannelGreeting(message, (channelName, channelRef)) =>
+    case ChannelSubscriptionResponse(channelName, channelRef) =>
       addToSubscribedChannels(channelName, channelRef)
-      forwardMessage(message)
+    case ChannelUnSubscriptionResponse(channelName, channelRef) =>
+      removeFromSubscribedChannels(channelName, channelRef)
+      forwardMessage(s"Unsubscribed from channel $channelName")
+    case ChannelDoesNotExist(channelName) =>
+      forwardMessage(s"Channel $channelName does not exist")
     case Message(message) => forwardMessage(message)
+    case DeliverMessage(channelName, message, from) =>
+      if(validChannel(channelName)) deliverMessage(channelName, message, from) else forwardMessage("Invalid channel")
     case SubscribedChannelsListRequest => sender ! SubscribedChannelsListResponse(myChannelsMap.keySet)
   }
 
@@ -41,5 +48,17 @@ class AuthenticatedClientHandler(val socket: Socket) extends Actor with ActorLog
 
   def addToSubscribedChannels(channelName: String, channelRef: ActorRef) = {
     myChannelsMap = Map(channelName -> channelRef) ++ myChannelsMap
+  }
+
+  def removeFromSubscribedChannels(channelName: String, channelRef: ActorRef) = {
+    myChannelsMap = myChannelsMap - channelName
+  }
+
+  def validChannel(channelName: String) = {
+    myChannelsMap.contains(channelName)
+  }
+
+  def deliverMessage(channelName: String, message: String, from: String) = {
+    myChannelsMap(channelName) ! ChannelMessage(message, from)
   }
 }
